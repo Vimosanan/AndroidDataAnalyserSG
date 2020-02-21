@@ -99,7 +99,7 @@ class DataAnalyseViewModel @Inject constructor(private var apiInterface: ApiInte
         }
     }
 
-    private fun combineForAnnualData(dataList: List<Record>): List<InternalRecordData> {
+    fun combineForAnnualData(dataList: List<Record>): List<InternalRecordData> {
         var quarter1 = 0.0
         var quarter2 = 0.0
         var quarter3 = 0.0
@@ -157,6 +157,5 @@ class DataAnalyseViewModel @Inject constructor(private var apiInterface: ApiInte
         val PROCESS_DATA_STR get() = "Processing Data...."
         val CACHING_IN_LOCAL_STR get() = "Caching Data into local database...."
         val READY_FOR_DISPLAY_STR get() = "Getting Ready for the display...."
-
     }
 }
