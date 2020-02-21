@@ -2,10 +2,7 @@ package com.vimosanan.dataanalysersg.di
 
 import android.app.Application
 import android.util.Log
-import androidx.room.Room
 import com.vimosanan.dataanalysersg.app.Constants
-import com.vimosanan.dataanalysersg.persistence.InternalRecordDao
-import com.vimosanan.dataanalysersg.persistence.InternalRecordDatabase
 import com.vimosanan.dataanalysersg.repository.network.ApiInterface
 import com.vimosanan.dataanalysersg.util.NetworkStatus
 import dagger.Module
@@ -49,21 +46,6 @@ class AppModule {
     fun provideNetworkService(retrofit: Retrofit): ApiInterface {
         return retrofit
             .create(ApiInterface::class.java)
-    }
-
-    @Singleton
-    @Provides
-    fun provideDb(app: Application): InternalRecordDatabase {
-        return Room
-            .databaseBuilder(app, InternalRecordDatabase::class.java, Constants.DATABASE_NAME)
-            .fallbackToDestructiveMigration()
-            .build()
-    }
-
-    @Singleton
-    @Provides
-    fun provideInternalDataDao(db: InternalRecordDatabase): InternalRecordDao {
-        return db.internalDataDao()
     }
 
     companion object {

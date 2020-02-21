@@ -146,7 +146,6 @@ class DataAnalyseActivity : DaggerAppCompatActivity() {
                 Status.ERROR -> {
                     progressBar.visibility = View.INVISIBLE
                     txtInfo.text = resources.getString(R.string.txt_label_info_error_loading_network)
-                    viewModel.connectToLocalDatabaseWhenInError()
                 }
             }
         })

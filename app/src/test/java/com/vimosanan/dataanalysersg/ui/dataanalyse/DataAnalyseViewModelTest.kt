@@ -1,6 +1,5 @@
 package com.vimosanan.dataanalysersg.ui.dataanalyse
 
-import com.vimosanan.dataanalysersg.persistence.InternalRecordDao
 import com.vimosanan.dataanalysersg.repository.models.InternalRecordData
 import com.vimosanan.dataanalysersg.repository.models.Record
 import com.vimosanan.dataanalysersg.repository.network.ApiInterface
