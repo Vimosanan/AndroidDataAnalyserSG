@@ -4,6 +4,7 @@
     <string name="txt_label_info_loading_network" tools:ignore="TypographyEllipsis">Loading data from network...</string>
     <string name="txt_label_info_error_loading_network">Error loading data from network!</string>
     <string name="txt_label_title">Mobile Data Usage\nSINGAPORE</string>
+    <string name="txt_label_tryAgain"><u>Try Again</u></string>
 
 
 </resources>

@@ -1,5 +1,6 @@
 package com.vimosanan.dataanalysersg.ui.dataanalyse
 
+import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.liveData
@@ -10,10 +11,12 @@ import com.vimosanan.dataanalysersg.repository.models.Record
 import com.vimosanan.dataanalysersg.repository.models.RecordViewData
 import com.vimosanan.dataanalysersg.repository.network.ApiInterface
 import com.vimosanan.dataanalysersg.util.Resource
+import com.vimosanan.dataanalysersg.util.Status
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.lang.Exception
 import javax.inject.Inject
 
 class DataAnalyseViewModel @Inject constructor(private var apiInterface: ApiInterface?, var dao: InternalRecordDao): ViewModel(){
@@ -26,12 +29,23 @@ class DataAnalyseViewModel @Inject constructor(private var apiInterface: ApiInte
     //live data observing loader value
     var loading = MutableLiveData<Boolean> ()
 
+    var status = MutableLiveData<Status> ()
+
     fun loadData(offset: Int, limit: Int) = liveData(IO){
         emit(Resource.loading(null))
 
-        val response = apiInterface?.getResults(offset, Constants.RESOURCE_ID,limit )
-        if(response!!.isSuccessful) {
-            emit(Resource.success(response.body()))
+        try{
+            delay(2_000)
+            val response = apiInterface?.getResults(offset, Constants.RESOURCE_ID,limit )
+
+            if(response!!.isSuccessful) {
+                emit(Resource.success(response.body()))
+
+            }
+        }catch (e: Exception){
+            infoStr.postValue(NO_CACHE_DATA)
+            loading.postValue(false)
+            status.postValue(Status.ERROR)
         }
     }
 
@@ -157,5 +171,6 @@ class DataAnalyseViewModel @Inject constructor(private var apiInterface: ApiInte
         val PROCESS_DATA_STR get() = "Processing Data...."
         val CACHING_IN_LOCAL_STR get() = "Caching Data into local database...."
         val READY_FOR_DISPLAY_STR get() = "Getting Ready for the display...."
+        val NO_CACHE_DATA get() = "OOPS, you are OFFLINE and NO CACHE available, please turn ON WIFI and try again!"
     }
 }

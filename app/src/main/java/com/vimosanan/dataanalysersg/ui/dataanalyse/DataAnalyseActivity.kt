@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.View
 import android.widget.LinearLayout
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -48,13 +49,8 @@ class DataAnalyseActivity : DaggerAppCompatActivity() {
         recyclerView.layoutManager = layoutManager
         recyclerView.adapter = adapter
 
-        //CHECK FOR THE NETWORK CONNECTIVITY
-        if(NetworkStatus.isNetworkConnected(this)) {
-            isLoading = true
-            loadData()
-        } else {
-            viewModel.getDataFromLocalDatabase()
-        }
+        //NO NEED TO CHECK NETWORK CONNECTIVITY -> RETROFIT WILL HANDLE THOSE USING INTERCEPTOR AND USE CACHE ACCORDINGLY
+        loadData()
 
         //HANDLE PAGINATION
         recyclerView.addOnScrollListener(object : PaginationScrollListener(layoutManager) {
@@ -68,12 +64,21 @@ class DataAnalyseActivity : DaggerAppCompatActivity() {
 
             override fun loadMoreItems() {
                 isLoading = true
-                if(NetworkStatus.isNetworkConnected(this@DataAnalyseActivity)){
-                    loadData()
-                }
+                loadData()
             }
         })
 
+        initObservers() //init observers for the view-model object
+
+
+        txtTryAgain.setOnClickListener{
+            loadData()
+            txtInfo.setTextColor(ContextCompat.getColor(this, R.color.colorGreyDark))
+            txtTryAgain.visibility = View.GONE
+        }
+    }
+
+    private fun initObservers(){
         viewModel.recordViewDataList.observe(this, Observer {
             if(it != null && it.isNotEmpty()){
                 yearDataList.addAll(it)
@@ -95,7 +100,15 @@ class DataAnalyseActivity : DaggerAppCompatActivity() {
                 progressBar.visibility = View.INVISIBLE
             }
         })
+
+        viewModel.status.observe(this, Observer {
+            if(it == Status.ERROR){
+                txtInfo.setTextColor(ContextCompat.getColor(this, R.color.colorRed))
+                txtTryAgain.visibility = View.VISIBLE
+            }
+        })
     }
+
 
     private fun loadData(){
         viewModel.loadData(offset, limit).observe(this, Observer { networkResource ->

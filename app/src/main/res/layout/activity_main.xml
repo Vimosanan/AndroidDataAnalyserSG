@@ -47,7 +47,8 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/txtInfo"
         tools:itemCount="5"
-        tools:listitem="@layout/card_view_year_data" />
+        tools:listitem="@layout/card_view_year_data"
+        tools:visibility="visible" />
 
     <ProgressBar
         android:id="@+id/progressBar"
@@ -59,5 +60,18 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:visibility="visible"/>
+
+    <TextView
+        android:id="@+id/txtTryAgain"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:text="@string/txt_label_tryAgain"
+        android:textColor="@color/colorPrimary"
+        android:elevation="2dp"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="@+id/txtInfo"
+        app:layout_constraintStart_toStartOf="@+id/txtInfo"
+        app:layout_constraintTop_toBottomOf="@+id/txtInfo" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
