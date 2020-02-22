@@ -12,12 +12,11 @@ import com.vimosanan.dataanalysersg.repository.network.ApiInterface
 import com.vimosanan.dataanalysersg.util.Resource
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.IO
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 class DataAnalyseViewModel @Inject constructor(private var apiInterface: ApiInterface?, var dao: InternalRecordDao): ViewModel(){
-    //mutable live data
+    //mutable live data for data list
     var recordViewDataList = MutableLiveData<List<RecordViewData>> ()
 
     //mutable live data observing the text value for text_view_info
@@ -26,24 +25,34 @@ class DataAnalyseViewModel @Inject constructor(private var apiInterface: ApiInte
     //live data observing loader value
     var loading = MutableLiveData<Boolean> ()
 
+    //live data fro snack bar
+    var snackBar = MutableLiveData<String> ()
+
     fun loadData(offset: Int, limit: Int) = liveData(IO){
         emit(Resource.loading(null))
+        try{
+            val response = apiInterface?.getResults(offset, Constants.RESOURCE_ID,limit )
 
-        val response = apiInterface?.getResults(offset, Constants.RESOURCE_ID,limit )
-        if(response!!.isSuccessful) {
-            emit(Resource.success(response.body()))
+            if(response!!.isSuccessful) {
+                emit(Resource.success(response.body()))
+            } else {
+                emit(Resource.error(BAD_RESPONSE, null))
+            }
+        } catch (e: Exception){
+            emit(Resource.error(ERROR_MSG, null))
         }
     }
 
     fun processData(recordList: List<Record>){
         CoroutineScope(IO).launch {
             infoStr.postValue(PROCESS_DATA_STR)
+
             val internalDataList = combineForAnnualData(recordList)
 
-            infoStr.postValue(CACHING_IN_LOCAL_STR)
             saveToLocalDatabase(internalDataList)
 
             infoStr.postValue(READY_FOR_DISPLAY_STR)
+
             val viewDataList = getViewData(internalDataList)
 
             recordViewDataList.postValue(viewDataList)
@@ -68,8 +77,12 @@ class DataAnalyseViewModel @Inject constructor(private var apiInterface: ApiInte
 
 
     private fun saveToLocalDatabase(dataList: List<InternalRecordData>){
+        //Coroutine new Job created on background Thread for saving the items in local room database as an async task while the other job process data for displaying
         CoroutineScope(IO).launch {
+            snackBar.postValue(SAVING_IN_LOCAL_STR)
+
             dao.insertDataToLocalDatabase(dataList)
+            snackBar.postValue(SUCCESSFULLY_SAVED_STR)
         }
     }
 
@@ -86,13 +99,11 @@ class DataAnalyseViewModel @Inject constructor(private var apiInterface: ApiInte
         infoStr.postValue(DATABASE_CONN_STR)
 
         CoroutineScope(IO).launch {
-            delay(2000)
             val internalRecordDataList = dao.getAllData()
 
             infoStr.postValue(READY_FOR_DISPLAY_STR)
             val viewDataList = getViewData(internalRecordDataList)
 
-            delay(2000)
             infoStr.postValue(SHOWING_RESULT_STR)
 
             recordViewDataList.postValue(viewDataList)
@@ -155,7 +166,10 @@ class DataAnalyseViewModel @Inject constructor(private var apiInterface: ApiInte
         val DATABASE_CONN_STR get() = "Connecting to local Database...."
         val SHOWING_RESULT_STR get() = "Showing results - Singapore Data Usage per year in PB"
         val PROCESS_DATA_STR get() = "Processing Data...."
-        val CACHING_IN_LOCAL_STR get() = "Caching Data into local database...."
+        val SAVING_IN_LOCAL_STR get() = "Saving Data into local database...."
         val READY_FOR_DISPLAY_STR get() = "Getting Ready for the display...."
+        val SUCCESSFULLY_SAVED_STR get() = "Successfully saved!"
+        val ERROR_MSG get() = "Something went wrong while connecting to the remote!"
+        val BAD_RESPONSE get() = "Request failed!"
     }
 }

@@ -7,6 +7,7 @@ import android.widget.LinearLayout
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.android.material.snackbar.Snackbar
 import com.vimosanan.dataanalysersg.R
 import com.vimosanan.dataanalysersg.adapters.YearDataAdapter
 import com.vimosanan.dataanalysersg.repository.models.RecordViewData
@@ -48,6 +49,8 @@ class DataAnalyseActivity : DaggerAppCompatActivity() {
         recyclerView.layoutManager = layoutManager
         recyclerView.adapter = adapter
 
+        initObservers()
+
         //CHECK FOR THE NETWORK CONNECTIVITY
         if(NetworkStatus.isNetworkConnected(this)) {
             isLoading = true
@@ -73,7 +76,9 @@ class DataAnalyseActivity : DaggerAppCompatActivity() {
                 }
             }
         })
+    }
 
+    private fun initObservers(){
         viewModel.recordViewDataList.observe(this, Observer {
             if(it != null && it.isNotEmpty()){
                 yearDataList.addAll(it)
@@ -95,16 +100,25 @@ class DataAnalyseActivity : DaggerAppCompatActivity() {
                 progressBar.visibility = View.INVISIBLE
             }
         })
+
+        viewModel.snackBar.observe(this, Observer {
+            it?.let {
+                showSnackBar(it)
+            }
+        })
     }
+
 
     private fun loadData(){
         viewModel.loadData(offset, limit).observe(this, Observer { networkResource ->
             when (networkResource.status) {
+
                 //LOADING FOR NETWORK RESPONSE
                 Status.LOADING -> {
                     txtInfo.text = resources.getString(R.string.txt_label_info_loading_network)
                     progressBar.visibility = View.VISIBLE
                 }
+
                 //IF NETWORK RESPONSE SUCCESS
                 Status.SUCCESS -> {
                     val entityResponse = networkResource.data
@@ -127,18 +141,24 @@ class DataAnalyseActivity : DaggerAppCompatActivity() {
                             }
                         }
                     }
-
                 }
+
                 //IF NETWORK ERROR
                 Status.ERROR -> {
                     progressBar.visibility = View.INVISIBLE
-                    txtInfo.text = resources.getString(R.string.txt_label_info_error_loading_network)
+
+                    networkResource.msg?.let {
+                        txtInfo.text = it
+                    }
                     viewModel.connectToLocalDatabaseWhenInError()
                 }
             }
         })
     }
 
+    private fun showSnackBar(str: String){
+        Snackbar.make(constraintLayout, str, Snackbar.LENGTH_LONG).show()
+    }
 
     companion object{
         //val TAG: String get() = "DataAnalyseActivity"
