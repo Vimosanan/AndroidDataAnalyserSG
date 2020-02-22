@@ -64,13 +64,10 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$rootProject.coroutine"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$rootProject.coroutine"
 
-    //dependency injection - dagger
-    api "com.google.dagger:dagger:$rootProject.dagger2Version"
-    kapt "com.google.dagger:dagger-compiler:$rootProject.dagger2Version"
-
-    api "com.google.dagger:dagger-android:$rootProject.dagger2Version"
-    api "com.google.dagger:dagger-android-support:$rootProject.dagger2Version"
-    kapt "com.google.dagger:dagger-android-processor:$rootProject.dagger2Version"
+    //koin injector
+    implementation "org.koin:koin-android:$rootProject.koinVersion"
+    implementation "org.koin:koin-android-scope:$rootProject.koinVersion"
+    implementation "org.koin:koin-android-viewmodel:$rootProject.koinVersion"
 
     //room database
     implementation "androidx.room:room-runtime:$rootProject.roomVersion"

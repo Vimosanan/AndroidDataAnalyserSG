@@ -45,6 +45,6 @@ ext {
 
     roomVersion = '2.2.3'
     retrofit2Version = '2.6.1'
-    dagger2Version = '2.26'
+    koinVersion = '2.0.1'
     coroutine = '1.3.3'
 }

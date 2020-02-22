@@ -14,9 +14,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import javax.inject.Inject
+import org.koin.core.KoinComponent
 
-class DataAnalyseViewModel @Inject constructor(private var apiInterface: ApiInterface?, var dao: InternalRecordDao): ViewModel(){
+class DataAnalyseViewModel (private var apiInterface: ApiInterface?, private var dao: InternalRecordDao): ViewModel(), KoinComponent{
     //mutable live data
     var recordViewDataList = MutableLiveData<List<RecordViewData>> ()
 

@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.View
 import android.widget.LinearLayout
+import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -13,17 +14,13 @@ import com.vimosanan.dataanalysersg.repository.models.RecordViewData
 import com.vimosanan.dataanalysersg.util.NetworkStatus
 import com.vimosanan.dataanalysersg.util.PaginationScrollListener
 import com.vimosanan.dataanalysersg.util.Status
-import com.vimosanan.dataanalysersg.viewmodels.ViewModelProviderFactory
-import dagger.android.support.DaggerAppCompatActivity
 import kotlinx.android.synthetic.main.activity_main.*
-import javax.inject.Inject
+import org.koin.android.viewmodel.ext.android.viewModel
 
-class DataAnalyseActivity : DaggerAppCompatActivity() {
+class DataAnalyseActivity : AppCompatActivity() {
 
-    @Inject
-    lateinit var viewModelProviderFactory: ViewModelProviderFactory
 
-    private lateinit var viewModel: DataAnalyseViewModel
+    private val dataAnalyseViewModel: DataAnalyseViewModel by viewModel()
 
     private lateinit var adapter: YearDataAdapter
     private var yearDataList: MutableList<RecordViewData> = mutableListOf()
@@ -38,10 +35,6 @@ class DataAnalyseActivity : DaggerAppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        viewModel = ViewModelProviders
-            .of(this, viewModelProviderFactory)
-            .get(DataAnalyseViewModel::class.java)
-
         adapter = YearDataAdapter(yearDataList)
 
         val layoutManager = LinearLayoutManager(this, LinearLayout.VERTICAL, false)
@@ -53,7 +46,7 @@ class DataAnalyseActivity : DaggerAppCompatActivity() {
             isLoading = true
             loadData()
         } else {
-            viewModel.getDataFromLocalDatabase()
+            dataAnalyseViewModel.getDataFromLocalDatabase()
         }
 
         //HANDLE PAGINATION
@@ -74,7 +67,7 @@ class DataAnalyseActivity : DaggerAppCompatActivity() {
             }
         })
 
-        viewModel.recordViewDataList.observe(this, Observer {
+        dataAnalyseViewModel.recordViewDataList.observe(this, Observer {
             if(it != null && it.isNotEmpty()){
                 yearDataList.addAll(it)
                 adapter.setAdapter(yearDataList)
@@ -82,13 +75,13 @@ class DataAnalyseActivity : DaggerAppCompatActivity() {
             }
         })
 
-        viewModel.infoStr.observe(this, Observer {
+        dataAnalyseViewModel.infoStr.observe(this, Observer {
             it?.let {
                 txtInfo.text = it
             }
         })
 
-        viewModel.loading.observe(this, Observer {
+        dataAnalyseViewModel.loading.observe(this, Observer {
             if(it){
                 progressBar.visibility = View.VISIBLE
             } else {
@@ -98,7 +91,7 @@ class DataAnalyseActivity : DaggerAppCompatActivity() {
     }
 
     private fun loadData(){
-        viewModel.loadData(offset, limit).observe(this, Observer { networkResource ->
+        dataAnalyseViewModel.loadData(offset, limit).observe(this, Observer { networkResource ->
             when (networkResource.status) {
                 //LOADING FOR NETWORK RESPONSE
                 Status.LOADING -> {
@@ -119,8 +112,7 @@ class DataAnalyseActivity : DaggerAppCompatActivity() {
                                     if(it.isEmpty() || it.size < limit){
                                         hasMore = false
                                     }
-
-                                    viewModel.processData(it)
+                                    dataAnalyseViewModel.processData(it)
                                 }
                             } else {
                                 isLoading = false
@@ -133,7 +125,7 @@ class DataAnalyseActivity : DaggerAppCompatActivity() {
                 Status.ERROR -> {
                     progressBar.visibility = View.INVISIBLE
                     txtInfo.text = resources.getString(R.string.txt_label_info_error_loading_network)
-                    viewModel.connectToLocalDatabaseWhenInError()
+                    dataAnalyseViewModel.connectToLocalDatabaseWhenInError()
                 }
             }
         })

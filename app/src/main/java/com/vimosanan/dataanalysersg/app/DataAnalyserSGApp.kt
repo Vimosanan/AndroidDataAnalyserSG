@@ -1,12 +1,25 @@
 package com.vimosanan.dataanalysersg.app
 
-import com.vimosanan.dataanalysersg.di.DaggerAppComponent
-import dagger.android.AndroidInjector
-import dagger.android.DaggerApplication
+import android.app.Application
+import com.vimosanan.dataanalysersg.di.appModule
+import org.koin.android.ext.koin.androidContext
+import org.koin.android.ext.koin.androidLogger
+import org.koin.core.context.startKoin
+import org.koin.dsl.module
 
-class DataAnalyserSGApp: DaggerApplication() {
 
-    override fun applicationInjector(): AndroidInjector<out DaggerApplication>? {
-        return DaggerAppComponent.builder().application(this).build()
+class DataAnalyserSGApp: Application() {
+
+    override fun onCreate() {
+        super.onCreate()
+
+        //start Koin Context
+        startKoin {
+            androidLogger()
+            androidContext(this@DataAnalyserSGApp)
+            modules(appModule)
+        }
     }
+
+
 }
